@@ -1,0 +1,120 @@
+---------------------------------- WHERE & AGGREGATION FUNCTIONS
+
+- Get the elements from userid
+
+SELECT userid FROM events LIMIT 10;
+
+- Get the unique values from the campaigns	
+
+SELECT DISTINCT campaing_id FROM users;
+
+- Get all rows where the campaign is equal to 'FB'
+
+SELECT userid, dt FROM users WHERE campaign_id = 'FB';
+
+- Aggregation functions
+
+SELECT COUNT(*) FROM users;
+
+- Select users that went through facebook
+
+SELECT COUNT(*) FROM users WHERE campaign_id = 'FB';
+
+	- Count for each of the groups
+	
+	SELECT COUNT(*) FROM users GROUPBY campaign_id;
+	
+	- Count distinct
+
+	SELECT COUNT(DISTINCT dt) FROM users;
+
+	- Select MAX & MIN registration dates
+
+	SELECT MIN(dt) FROM users;
+	SELECT MAX(dt) FROM users;
+
+	- Get the average price of meal
+
+		SELECT AVG(price) FROM meals;
+
+	- Get avg, minimum &. Maximum prices by type of meal
+
+	SELECT type,AVG(price),MIN(price),MAX(price) from meals GROUP BY type;
+
+	- Aliasing the names of the columns:
+
+	
+	SELECT type,AVG(price) AS avg_price, MIN(price) AS min_price, MAX(price) AS max_price FROM meals GROUP BY type;
+
+	- Splitting dates and querying with 'em:
+
+	SELECT type,AVG(price) AS avg_price, MIN(price) AS min_price, MAX(price) AS max_price FROM meals WHERE DATE_PART('month',dt) <= 3 AND DATE_PART('year',dt) = 2013 GROUP BY type;
+
+	- One more query adding group by month:
+
+	SELECT DATE_PART('month',dt) AS month,type,AVG(price) AS avg_price, MIN(price) AS min_price, MAX(price) AS max_price FROM meals WHERE DATE_PART('month',dt) <= 3 AND DATE_PART('year',dt) = 2013 GROUP BY type, month;
+
+	- Querying the events table that gets the total number of buys, likes and 	  shares for each meal id
+
+	SELECT meal_id, event, SUM(CASE WHEN event='bought' OR event='like'OR event='share'THEN 1 ELSE 0 END) AS sum_bought FROM events GROUP BY event,meal_id;
+
+---------------------------------- SORTING
+
+	- SELECT type,AVG(price) AS avg_price FROM meals GROUP BY type;
+
+	- SELECT type,AVG(price) AS avg_price FROM meals GROUP BY type ORDER BY type;
+
+	- SELECT type,AVG(price) AS avg_price FROM meals GROUP BY type ORDER BY avg_price DESC;
+
+	- SELECT type,AVG(price) AS avg_price FROM meals GROUP BY type ORDER BY type, avg_price;
+
+
+
+
+---------------------------------- JOINS
+
+	- Join events and users table:
+
+	SELECT events.userid, users.campaign_id, meal_id, event
+	FROM events
+	JOIN users
+	ON events.userid = users.userid;
+
+	- Join three tables and filter by and attribute:
+
+	SELECT events.userid, users.campaign_id,events. meal_id, meals.type, 		meals.price
+	FROM events
+	JOIN users
+	ON (events.userid = users.userid AND events.event = 'bought')
+	JOIN meals ON meals.meal_id = events.meal_id;
+
+	- Join
+
+	SELECT events.userid, users.campaign_id,events. meal_id, meals.type, meals.price                 
+	FROM events
+	JOIN users
+	ON (events.userid = users.userid AND events.event = 'bought')
+	JOIN meals ON meals.meal_id = events.meal_id;
+
+
+	- Sum of bought events by type of meal
+
+
+	SELECT meals.type, COUNT(events.event)
+	FROM events
+	JOIN users
+	ON (events.userid = users.userid AND events.event = 'bought')
+	JOIN meals ON meals.meal_id = events.meal_id
+	GROUP BY meals.type;
+
+ 
+---------------------------------- SUBQUERIES
+
+	- SELECT meal_id,AVG(price) FROM meals WHERE price > (SELECT AVG(price) FROM meals) 	  GROUP BY meal_id;
+
+	- SELECT meals.meal_id,meals.type, meals.price FROM meals
+	JOIN (SELECT meals.type, AVG(meals.price) AS avg_price FROM meals GROUP BY type) average
+	ON meals.price > average.avg_price;
+
+
+
