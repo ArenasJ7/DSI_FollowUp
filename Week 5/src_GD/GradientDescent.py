@@ -35,7 +35,7 @@ class GradientDescent(object):
         self.fit_intercept = fit_intercept
         self.standardize = standardize
 
-    def fit(self, X, y):
+    def fit(self, X, y, step_size = None):
         """Run the gradient descent algorithm for num_iterations repetitions.
 
         Parameters
@@ -49,11 +49,12 @@ class GradientDescent(object):
         -------
         self:  The fit GradientDescent object.
         """
+
+        cost_step = []
         
         if self.standardize:
             
-              X = self.scale_X(X)
-              y = self.scale_y(y)
+            X = self.scale_X(X)
         
         if self.fit_intercept:
             
@@ -61,11 +62,26 @@ class GradientDescent(object):
         
         self.coeffs = np.zeros(X.shape[1])
         
-        for _ in range(self.num_iterations):
-            
-            res = self.coeffs - self.alpha * self.gradient(X, y, self.coeffs)
+        if step_size == None:
         
-        self.coeffs = res
+            for _ in range(self.num_iterations):
+                
+                grad = self.gradient(X, y, self.coeffs)
+                self.coeffs = self.coeffs - self.alpha * grad
+            
+            
+        else:
+            while True:
+            
+                self.coeffs = self.coeffs - self.alpha * self.gradient(X, y, self.coeffs)
+                cost_step.append(self.cost(X,y,self.coeffs)) 
+            
+                if ((cost_step[-2] - cost_step[-1]) <= step_size):
+                    print(cost_step[-1], cost_step[-2], count)
+                    break
+            
+            
+        
 
     def predict(self, X):
         """Call self.predict_func to return predictions.

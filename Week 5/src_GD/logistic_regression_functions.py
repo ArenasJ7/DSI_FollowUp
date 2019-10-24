@@ -55,7 +55,7 @@ def predict(X, coeffs, thresh=0.5):
     return predicted
 
 
-def cost(X, y, coeffs):
+def cost(X, y, coeffs, lam = 0):
     """
     Calculate the total logistic cost function of the data with the given
     coefficients.
@@ -77,12 +77,12 @@ def cost(X, y, coeffs):
         The value of the logistic cost function evaluated at the given
         coefficients.
     """
-    logistic_cost = np.sum(y*np.log(predict_proba(X, coeffs)) + (1-y)*(np.log(1 - predict_proba(X, coeffs))))
+    logistic_cost = -1*np.sum(y*np.log(predict_proba(X, coeffs)) + (1-y)*(np.log(1 - predict_proba(X, coeffs)))) + (lam * np.sum(coeffs**2))
                                                                       
     
     return logistic_cost
                                                                       
-def gradient(X, y, coeffs):
+def gradient(X, y, coeffs, lam = 0):
     """
     Calculate the gradient of the logistic cost function with the given
     coefficients.
@@ -106,7 +106,7 @@ def gradient(X, y, coeffs):
     """
     
     h = predict_proba(X,coeffs) - y
-    logistic_gradient = np.sum(X.transpose()*h, axis = 1)
+    logistic_gradient = X.transpose().dot(h) + (lam * 2 * np.sum(coeffs))
     
     return logistic_gradient
 
@@ -128,3 +128,9 @@ def add_intercept(X):
     X = np.append(b_0, X, axis = 1)
     
     return X
+
+def cost_regularized(X, y, coeffs):
+    return cost(X, y, coeffs, lam=1)
+
+def gradient_regularized(X, y, coeffs):
+    return gradient(X, y, coeffs, lam=1)
